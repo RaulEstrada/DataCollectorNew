@@ -73,6 +73,7 @@ public class Background_Service extends Service implements SensorEventListener {
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		super.onStartCommand(intent, flags, startId);
 		Log.i("Service State", "onStartCommand()");
+		System.out.print("Hello world")
 
 		Data = new String[] { "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0",
 				"0.0" };
