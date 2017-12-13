@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">AndroidGyroscope</string>
+    <string name="magneticLabel">Magnetic field</string>
+    <string name="x">X:</string>
+    <string name="y">Y:</string>
+    <string name="z">Z:</string>
+    <string name="act_label">Inclination Sensor</string>
+    <string name="accelLabel">Accelerometer</string>
+    <string name="orientLabel">Orientation</string>
+</resources>
