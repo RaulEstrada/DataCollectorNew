@@ -2,6 +2,7 @@ package gyroreader.nn.com.androidgyroscope;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Environment;
@@ -12,10 +13,13 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import org.w3c.dom.Text;
@@ -40,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView acceleroView;
     private TextView orientationView;
     private TextView resultsView;
+    private double userHeight = 1f;
 
     public void startService() {
         Log.d("RAUL", "startService()");
@@ -102,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
 
         mBound = false;
         isStarted=false;
+        createHeightInputDialog();
     }
 
     @Override
@@ -124,7 +130,21 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         // Register sensors listeners
         Log.i("UI State", "onResume()");
+    }
 
+    private void createHeightInputDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("User height (cm)");
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        builder.setView(input);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                userHeight = Double.parseDouble(input.getText().toString());
+            }
+        });
+        builder.show();
     }
 
     /** Stop the updates when Activity is paused */
@@ -238,11 +258,11 @@ public class MainActivity extends AppCompatActivity {
             boolean landscape = Math.abs(data[0]) >= Math.abs(data[1]);
             float angle = (landscape) ? data[8] : data[7];
             angle = Math.abs(angle);
-            if (landscape) {
-                resultsView.setText("Landscape: " + String.format("%.3f", angle));
-            } else {
-                resultsView.setText("Portrait: " + String.format("%.3f", angle));
-            }
+            double distance = Math.tan(Math.toRadians(angle)) * userHeight;
+            String resultString = (landscape) ? "Landscape: " : "Portrait: ";
+            resultString += String.format("%.3f", angle) + "\nHeight: " + userHeight +
+                    " cm.\nDistance: " + String.format("%.3f", distance) + " cm.";
+            resultsView.setText(resultString);
         }
     };
 

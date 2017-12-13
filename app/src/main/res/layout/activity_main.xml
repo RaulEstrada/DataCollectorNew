@@ -26,7 +26,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/guide2"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.12" />
+        app:layout_constraintGuide_percent="0.15" />
 
     <TextView
         android:id="@+id/magneticLabel"
@@ -119,7 +119,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/guide4"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.32" />
+        app:layout_constraintGuide_percent="0.35" />
 
     <TextView
         android:id="@+id/accelerValues"
@@ -143,7 +143,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/guide6"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.52" />
+        app:layout_constraintGuide_percent="0.55" />
 
     <TextView
         android:id="@+id/orientaLabel"
@@ -179,7 +179,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/guide8"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.72" />
+        app:layout_constraintGuide_percent="0.75" />
 
     <TextView
         android:id="@+id/resultLabel"
