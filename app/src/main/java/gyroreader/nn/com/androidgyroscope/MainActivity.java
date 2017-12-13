@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView magneticView;
     private TextView acceleroView;
     private TextView orientationView;
+    private TextView resultsView;
 
     public void startService() {
         Log.d("RAUL", "startService()");
@@ -81,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
         magneticView = (TextView) findViewById(R.id.magneticValues);
         acceleroView = (TextView) findViewById(R.id.accelerValues);
         orientationView = (TextView) findViewById(R.id.orientaValues);
+        resultsView = (TextView) findViewById(R.id.resultValues);
         paintSensorData(0f, 0f, 0f, magneticView);
         paintSensorData(0f, 0f, 0f, acceleroView);
         paintSensorData(0f, 0f, 0f, orientationView);
@@ -229,20 +231,18 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void run() {
-            // TODO Auto-generated method stub
-            /*accelerationView.setText(data[0]);
-            orientationView.setText(data[1]);
-            gyroscopeView.setText(data[2]);
-            proximityView.setText(data[3]);
-            gravityView.setText(data[4]);
-            magneticfieldView.setText(data[5]);
-            lineaccview.setText(data[6]);
-            rotvector.setText(data[7]);
-            soundlevelView.setText(data[8]);*/
             paintSensorData(data[0], data[1], data[2], acceleroView);
             paintSensorData(data[3], data[4], data[5], magneticView);
             paintSensorData(data[6], data[7], data[8], orientationView);
             Log.d("RAUL", data[0] + ", " + data[1] + ", " + data[2]);
+            boolean landscape = Math.abs(data[0]) >= Math.abs(data[1]);
+            float angle = (landscape) ? data[8] : data[7];
+            angle = Math.abs(angle);
+            if (landscape) {
+                resultsView.setText("Landscape: " + String.format("%.3f", angle));
+            } else {
+                resultsView.setText("Portrait: " + String.format("%.3f", angle));
+            }
         }
     };
 

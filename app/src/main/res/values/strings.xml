@@ -7,4 +7,5 @@
     <string name="act_label">Inclination Sensor</string>
     <string name="accelLabel">Accelerometer</string>
     <string name="orientLabel">Orientation</string>
+    <string name="results">Results</string>
 </resources>
