@@ -12,13 +12,16 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -29,34 +32,36 @@ import java.io.File;
 public class MainActivity extends AppCompatActivity {
     /** Messenger for communicating with the service. */
     Messenger msnService = null;
-
     /** Receiver for getting data from service */
     Receiver receptor;
     private float[] data;
     /** Flag indicating whether we have called bind on the service. */
     private boolean mBound;
-
     /** Flag indicating whether we have started the service. */
     private boolean isStarted;
+    /** Button to start reading sensor data and computing the distance */
     private FloatingActionButton startBtn;
+    /** Button to stop reading sensor data and computing the distance */
     private FloatingActionButton stopBtn;
+    /** View that displays the magnetic field raw sensor data for debugging purposes */
     private TextView magneticView;
+    /** View that displays the accelerometer raw sensor data for debugging purposes */
     private TextView acceleroView;
+    /** View that displays the orientation angles computed for debugging purposes */
     private TextView orientationView;
+    /** View that displays the final results: phone position (landscape/portrait), angle of inclination
+     * and distance*/
     private TextView resultsView;
+    /** User height he/she inputs and that will be used to compute the distance */
     private double userHeight = 1f;
 
     public void startService() {
-        Log.d("RAUL", "startService()");
         stopBtn.setVisibility(View.VISIBLE);
         startBtn.setVisibility(View.GONE);
         if (!mBound) {
-            Log.d("RAUL", "startService: Not bound!");
             return;
         }
-        Log.d("RAUL", "startService: Bound");
-        // Create and send a message to the service, using a supported 'what'
-        // value
+        // Create and send a message to the service, using a supported 'what' value
         Message msg = Message.obtain(null, SensorBackgroundService.MSG_SENSOR_REGISTER, 0, 0);
         try {
             msnService.send(msg);
@@ -88,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
         acceleroView = (TextView) findViewById(R.id.accelerValues);
         orientationView = (TextView) findViewById(R.id.orientaValues);
         resultsView = (TextView) findViewById(R.id.resultValues);
+        // At first, all values are initialized to 0 and displayed this way to the user
         paintSensorData(0f, 0f, 0f, magneticView);
         paintSensorData(0f, 0f, 0f, acceleroView);
         paintSensorData(0f, 0f, 0f, orientationView);
@@ -134,14 +140,14 @@ public class MainActivity extends AppCompatActivity {
 
     private void createHeightInputDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("User height (cm)");
-        final EditText input = new EditText(this);
-        input.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        builder.setView(input);
+        View viewInflated = LayoutInflater.from(getApplication())
+                .inflate(R.layout.height_dialog, null);
+        builder.setView(viewInflated);
+        final EditText inputHeight = (EditText) findViewById(R.id.heightInput);
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                userHeight = Double.parseDouble(input.getText().toString());
+                userHeight = Double.parseDouble(inputHeight.getText().toString());
             }
         });
         builder.show();
@@ -158,7 +164,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         Log.i("UI State", "onStop()");
-
     }
 
     @Override
@@ -182,7 +187,6 @@ public class MainActivity extends AppCompatActivity {
             // interact with the service. We are communicating with the
             // service using a Messenger, so here we get a client-side
             // representation of that from the raw IBinder object.
-            Log.d("RAUL", "onServiceConnected");
             msnService = new Messenger(service);
             mBound = true;
         }
@@ -197,56 +201,34 @@ public class MainActivity extends AppCompatActivity {
     };
 
     void onBindService() {
-        Log.d("RAUL", "onBindService()");
         if (!mBound) {
-            Log.d("RAUL", "onBindService: not mBound");
-            Intent intent_from_trial_selector = getIntent();
-            Bundle bundle = intent_from_trial_selector.getExtras();
-            File dir = getAlbumStorageDir("testGyroscope");
-            String filename = "test";
-            String[] patient = new String[]{dir.getName(), filename};
             receptor = new Receiver(null);
             Intent intent = new Intent(getApplicationContext(), SensorBackgroundService.class);
             intent.putExtra("Receiver", receptor);
-            intent.putExtra("Content", patient);
             bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
         }
     }
 
-    static public File getAlbumStorageDir(String albumName) {
-        // Get the directory for the user's public pictures directory.
-        File file = new File(
-                Environment
-                        .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                albumName);
-        if (!file.mkdirs()) {
-            Log.e("Error", "Directory not created");
-        }
-        return file;
-    }
-
     public class Receiver extends ResultReceiver {
-
         @Override
         protected void onReceiveResult(int resultCode, final Bundle resultData) {
-            // TODO Auto-generated method stub
-
             if (resultCode == 100) {
                 data = resultData.getFloatArray("Array");
-                Log.d("RAUL ON RECEIVE", data.toString());
                 runOnUiThread(updateGUI);
             }
-
         }
 
         public Receiver(Handler handler) {
             super(handler);
-            // TODO Auto-generated constructor stub
         }
-
     }
 
-    // Runnables
+    /**Runnables. It receives the data from the accelerometer and the magnetic field sensors, as well
+        as the orientation angles on all three axis. Using the gravity on the x-axis and the y-axis we can
+        see if the device is in landscape or portrait mode. If the device is in portrait mode, we use the
+        pitch as the inclination angle. If the device is in landscape mode, we use the roll as the inclination
+        angle. With the user height and the inclination angle, we can compute the distance using the tangent
+     */
     private Runnable updateGUI = new Runnable() {
 
         @Override
@@ -254,7 +236,8 @@ public class MainActivity extends AppCompatActivity {
             paintSensorData(data[0], data[1], data[2], acceleroView);
             paintSensorData(data[3], data[4], data[5], magneticView);
             paintSensorData(data[6], data[7], data[8], orientationView);
-            Log.d("RAUL", data[0] + ", " + data[1] + ", " + data[2]);
+            // When absolute value of gravity on x-axis is greater than the absolute value of gravity on
+            // y-axis, then the device is in landscape mode.
             boolean landscape = Math.abs(data[0]) >= Math.abs(data[1]);
             float angle = (landscape) ? data[8] : data[7];
             angle = Math.abs(angle);
@@ -266,6 +249,10 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    /**
+     * Helper method that formats all the sensor values to have 3 decimal digits and displays them
+     * in the specified view.
+     */
     private void paintSensorData(float val1, float val2, float val3, TextView view) {
         view.setText(String.format("%.3f, %.3f, %.3f", val1, val2, val3));
     }

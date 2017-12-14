@@ -8,4 +8,5 @@
     <string name="accelLabel">Accelerometer</string>
     <string name="orientLabel">Orientation</string>
     <string name="results">Results</string>
+    <string name="heightLabel">Introduce your height</string>
 </resources>
