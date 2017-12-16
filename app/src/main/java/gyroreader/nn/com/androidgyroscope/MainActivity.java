@@ -34,6 +34,9 @@ public class MainActivity extends AppCompatActivity {
     Messenger msnService = null;
     /** Receiver for getting data from service */
     Receiver receptor;
+    /** Array of float values holding the sensor data returned by the sensor background service.
+     * First three values correspond to accelerometer, three next values are magnetic field sensor
+     * data, and last three values are orientation angle values*/
     private float[] data;
     /** Flag indicating whether we have called bind on the service. */
     private boolean mBound;
@@ -138,19 +141,30 @@ public class MainActivity extends AppCompatActivity {
         Log.i("UI State", "onResume()");
     }
 
+    /**
+     * This method creates an alert dialog where the user enters his/her height, needed to later
+     * compute the distance to the point displayed in the middle of the screen.
+     */
     private void createHeightInputDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        View viewInflated = LayoutInflater.from(getApplication())
+        AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this, R.style.CustomDialogFragment);
+        builder.setTitle(R.string.userHeightTitle);
+        View viewInflated = LayoutInflater.from(getApplicationContext())
                 .inflate(R.layout.height_dialog, null);
         builder.setView(viewInflated);
-        final EditText inputHeight = (EditText) findViewById(R.id.heightInput);
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        final EditText inputHeight = (EditText) viewInflated.findViewById(R.id.heightInput);
+        builder.setCancelable(false)
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                userHeight = Double.parseDouble(inputHeight.getText().toString());
+                String input = inputHeight.getText().toString();
+                if (input == null || input.isEmpty()) {
+                    return;
+                }
+                userHeight = Double.parseDouble(input);
             }
         });
-        builder.show();
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     /** Stop the updates when Activity is paused */
@@ -239,11 +253,18 @@ public class MainActivity extends AppCompatActivity {
             // When absolute value of gravity on x-axis is greater than the absolute value of gravity on
             // y-axis, then the device is in landscape mode.
             boolean landscape = Math.abs(data[0]) >= Math.abs(data[1]);
+            // If landscape mode, we use the roll. Otherwise, we use the pitch
             float angle = (landscape) ? data[8] : data[7];
             angle = Math.abs(angle);
-            double distance = Math.tan(Math.toRadians(angle)) * userHeight;
+            // The inclination angle (roll or pitch) and the angle with the floor form a right angle,
+            // so we can compute the angle with the floor to later use its tangent to compute the distance d
+            float floorAngle = 90 - angle;
+            Double distance = Double.NaN;
+            if (floorAngle != 0) {
+                distance = userHeight / Math.tan(Math.toRadians(floorAngle));
+            }
             String resultString = (landscape) ? "Landscape: " : "Portrait: ";
-            resultString += String.format("%.3f", angle) + "\nHeight: " + userHeight +
+            resultString += String.format("%.3f", floorAngle) + "º\nHeight: " + userHeight +
                     " cm.\nDistance: " + String.format("%.3f", distance) + " cm.";
             resultsView.setText(resultString);
         }

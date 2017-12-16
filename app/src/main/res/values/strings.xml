@@ -9,4 +9,6 @@
     <string name="orientLabel">Orientation</string>
     <string name="results">Results</string>
     <string name="heightLabel">Introduce your height</string>
+    <string name="userHeightTitle">User height</string>
+    <string name="ok">OK</string>
 </resources>
