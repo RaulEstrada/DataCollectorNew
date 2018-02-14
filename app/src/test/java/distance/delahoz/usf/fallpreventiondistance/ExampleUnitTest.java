@@ -1,4 +1,4 @@
-package gyroreader.nn.com.androidgyroscope;
+package distance.delahoz.usf.fallpreventiondistance;
 
 import org.junit.Test;
 

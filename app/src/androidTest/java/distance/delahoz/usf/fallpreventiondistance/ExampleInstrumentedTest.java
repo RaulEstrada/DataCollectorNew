@@ -1,4 +1,4 @@
-package gyroreader.nn.com.androidgyroscope;
+package distance.delahoz.usf.fallpreventiondistance;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("gyroreader.nn.com.androidgyroscope", appContext.getPackageName());
+        assertEquals("distance.delahoz.usf.fallpreventiondistance", appContext.getPackageName());
     }
 }

@@ -1,4 +1,4 @@
-package gyroreader.nn.com.androidgyroscope;
+package distance.delahoz.usf.fallpreventiondistance.callbacks;
 
 import android.app.Service;
 import android.content.Context;
@@ -8,7 +8,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -17,14 +16,9 @@ import android.os.ResultReceiver;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
+
 /**
  * Service that gathers data from the accelerometer and the magnetic field sensors. From this
  * raw data, it computes the Android inclination matrix I and the rotation matrix R. From the
@@ -51,14 +45,11 @@ public class SensorBackgroundService extends Service implements SensorEventListe
     private static final int POLL_INTERVAL = 300;
     private Bundle bundle;
     private ResultReceiver receptor;
-    static final int MSG_SENSOR_REGISTER = 2;
-    static final int MSG_SENSOR_UNREGISTER = 3;
+    public static final int MSG_SENSOR_REGISTER = 2;
+    public static final int MSG_SENSOR_UNREGISTER = 3;
     private mTask task_updateUI;
-    private mTask task_saveDataToFile;
     private Timer timer_updateUI;
-    private Timer timer_saveDataToFile;
     private boolean flag = false;
-    private FileUtil fileUtil = new FileUtil();
     // Values of the acceleration force on all three axis of the device. Needed to compute device orientation
     private float[] gravity;
     // Values of the magnetic field on all three axis of the device. Needed to compute device orientation
@@ -73,7 +64,6 @@ public class SensorBackgroundService extends Service implements SensorEventListe
     public void onCreate() {
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         timer_updateUI = new Timer();
-        timer_saveDataToFile = new Timer();
     }
 
     @Override
@@ -90,7 +80,6 @@ public class SensorBackgroundService extends Service implements SensorEventListe
         if (flag) {
             UnregisterSensors();
             task_updateUI.cancel();
-            task_saveDataToFile.cancel();
         }
     }
 
@@ -194,15 +183,12 @@ public class SensorBackgroundService extends Service implements SensorEventListe
                 case MSG_SENSOR_REGISTER:
                     RegisterSensors();
                     task_updateUI = new mTask(0);
-                    task_saveDataToFile = new mTask(1);
                     timer_updateUI.scheduleAtFixedRate(task_updateUI, 100, 100); // Timer to update UI
-                    timer_saveDataToFile.scheduleAtFixedRate(task_saveDataToFile, 1000, 10); // Timer to write to file
                     flag = true;
                     break;
                 case MSG_SENSOR_UNREGISTER:
                     UnregisterSensors();
                     task_updateUI.cancel();
-                    task_saveDataToFile.cancel();
                     flag = false;
                     break;
                 default:
@@ -220,8 +206,6 @@ public class SensorBackgroundService extends Service implements SensorEventListe
         public void run() {
             if (task == 0) {
                 updateUI();
-            } else {
-                fileUtil.saveData(sensorValues);
             }
         }
     }

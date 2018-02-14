@@ -2,10 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/../../GIT2/DataCollectorNew/AndroidGyroscope.iml" filepath="$PROJECT_DIR$/../../GIT2/DataCollectorNew/AndroidGyroscope.iml" />
-      <module fileurl="file://$PROJECT_DIR$/DataCollectorNew.iml" filepath="$PROJECT_DIR$/DataCollectorNew.iml" />
+      <module fileurl="file://$PROJECT_DIR$/FallPreventionDistance.iml" filepath="$PROJECT_DIR$/FallPreventionDistance.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../../GIT2/DataCollectorNew/app/app.iml" filepath="$PROJECT_DIR$/../../GIT2/DataCollectorNew/app/app.iml" />
     </modules>
   </component>
 </project>
